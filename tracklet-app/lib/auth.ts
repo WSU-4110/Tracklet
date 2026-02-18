@@ -1,10 +1,7 @@
-'use server';
-
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
 
-export async function signOut() {
+export async function getCurrentUser() {
   const cookieStore = await cookies();
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -24,9 +21,9 @@ export async function signOut() {
     },
   });
 
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    throw error;
-  }
-  revalidatePath('/');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return user;
 }
