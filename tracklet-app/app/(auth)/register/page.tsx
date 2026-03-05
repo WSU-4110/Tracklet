@@ -1,38 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useFormState, useFormStatus } from 'react-dom';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { register, type AuthActionState } from '@/app/actions/auth';
+
+const initialState: AuthActionState = {};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all"
+    >
+      {pending ? 'Creating account...' : 'Create Account'}
+    </button>
+  );
+}
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      router.push('/');
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message || 'Failed to register');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [state, formAction] = useFormState(register, initialState);
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
@@ -51,13 +39,40 @@ export default function RegisterPage() {
           <p className="text-gray-600 text-sm">Create your account</p>
         </div>
         
-        {error && (
+        {state.error && (
           <div className="mb-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-700 rounded-xl">
-            <p className="text-sm font-medium">{error}</p>
+            <p className="text-sm font-medium">{state.error}</p>
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-5">
+        <form action={formAction} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+                First name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                className="w-full text-gray-600 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+                Last name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                className="w-full text-gray-600 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
               Email
@@ -65,10 +80,9 @@ export default function RegisterPage() {
             <input
               id="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
               required
-              className="w-full px-4 py-3 text-gray-700 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
+              className="w-full text-gray-600 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
               placeholder="you@example.com"
             />
           </div>
@@ -80,22 +94,15 @@ export default function RegisterPage() {
             <input
               id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
               required
               minLength={6}
-              className="w-full px-4 py-3 text-gray-700 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
+              className="w-full text-gray-600 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-white/70 transition-all"
               placeholder="At least 6 characters"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
+          <SubmitButton />
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
