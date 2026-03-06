@@ -1,10 +1,9 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { addItem, type ItemActionState } from '../actions/items';
-import { useEffect, useRef, useState } from 'react';
-
-const initialState: ItemActionState = {};
+import { useFormStatus } from 'react-dom';
+import { addItem } from '../actions/items';
+import { useRef, useState } from 'react';
+import { useFormObserver } from './useFormObserver';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -20,16 +19,15 @@ function SubmitButton() {
 }
 
 export default function AddItemForm() {
-  const [state, formAction] = useFormState(addItem, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    if (state.success) {
+  const [state, formAction] = useFormObserver(addItem, {
+    onSuccess: () => {
       formRef.current?.reset();
       setIsOpen(false);
-    }
-  }, [state.success]);
+    },
+  });
 
   return (
     <div className="space-y-3">

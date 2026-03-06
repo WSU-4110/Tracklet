@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { updateItem, type ItemActionState } from '../actions/items';
-import { useFormState, useFormStatus } from 'react-dom';
+import { updateItem } from '../actions/items';
+import { useFormStatus } from 'react-dom';
 import type { Item } from '@/lib/items';
-
-const initialState: ItemActionState = {};
+import { useFormObserver } from './useFormObserver';
 
 function EditSubmitButton() {
   const { pending } = useFormStatus();
@@ -22,7 +21,10 @@ function EditSubmitButton() {
 
 export default function ItemCard({ item }: { item: Item }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [state, formAction] = useFormState(updateItem, initialState);
+
+  const [state, formAction] = useFormObserver(updateItem, {
+    onSuccess: () => setIsEditing(false),
+  });
 
   if (isEditing) {
     return (
