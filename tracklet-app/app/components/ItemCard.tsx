@@ -9,6 +9,7 @@ const initialState: ItemActionState = {};
 
 function EditSubmitButton() {
   const { pending } = useFormStatus();
+
   return (
     <button
       type="submit"
@@ -23,14 +24,16 @@ function EditSubmitButton() {
 export default function ItemCard({ item }: { item: Item }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteState, setDeleteState] = useState<ItemActionState>({});
+  const [deleteError, setDeleteError] = useState('');
   const [state, formAction] = useFormState(updateItem, initialState);
 
   const handleDelete = async () => {
-    const result = await deleteItem(item.id);
-    setDeleteState(result);
-    if (result.success) {
+    try {
+      setDeleteError('');
+      await deleteItem(item.id);
       setShowDeleteConfirm(false);
+    } catch (error) {
+      setDeleteError('Failed to delete item.');
     }
   };
 
@@ -42,13 +45,16 @@ export default function ItemCard({ item }: { item: Item }) {
             {state.error}
           </div>
         )}
+
         {state.success && (
           <div className="mb-4 p-3 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 text-emerald-700 rounded-xl text-sm">
             Item updated!
           </div>
         )}
+
         <form action={formAction} className="space-y-3">
           <input type="hidden" name="id" value={item.id} />
+
           <div>
             <input
               type="text"
@@ -59,6 +65,7 @@ export default function ItemCard({ item }: { item: Item }) {
               placeholder="Item name"
             />
           </div>
+
           <div className="grid grid-cols-2 gap-2">
             <input
               type="text"
@@ -74,6 +81,7 @@ export default function ItemCard({ item }: { item: Item }) {
               className="w-full text-gray-700 px-3 py-2 bg-white/50 backdrop-blur-sm border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
             />
           </div>
+
           <div className="grid grid-cols-2 gap-2">
             <input
               type="text"
@@ -91,6 +99,7 @@ export default function ItemCard({ item }: { item: Item }) {
               placeholder="Price"
             />
           </div>
+
           <div className="flex gap-2">
             <EditSubmitButton />
             <button
@@ -108,9 +117,9 @@ export default function ItemCard({ item }: { item: Item }) {
 
   return (
     <div className="glass rounded-2xl border border-gray-400/80 bg-white/45 shadow-md p-4">
-      {deleteState.error && (
+      {deleteError && (
         <div className="mb-3 p-3 bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-700 rounded-xl text-sm">
-          {deleteState.error}
+          {deleteError}
         </div>
       )}
 
@@ -121,12 +130,14 @@ export default function ItemCard({ item }: { item: Item }) {
           </p>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleDelete}
               className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-semibold rounded-xl hover:from-red-600 hover:to-pink-600 shadow-lg transition-all"
             >
               Delete
             </button>
             <button
+              type="button"
               onClick={() => setShowDeleteConfirm(false)}
               className="px-4 py-2 glass border border-white/30 text-gray-700 text-sm font-semibold rounded-xl hover:bg-white/30 transition-all"
             >
@@ -149,14 +160,17 @@ export default function ItemCard({ item }: { item: Item }) {
               </p>
             )}
           </div>
+
           <div className="flex gap-2 ml-4">
             <button
+              type="button"
               onClick={() => setIsEditing(true)}
               className="px-3 py-1.5 glass border border-white/30 text-gray-700 text-xs font-semibold rounded-lg hover:bg-white/30 transition-all"
             >
               Edit
             </button>
             <button
+              type="button"
               onClick={() => setShowDeleteConfirm(true)}
               className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-semibold rounded-lg hover:from-red-600 hover:to-pink-600 shadow-lg transition-all"
             >

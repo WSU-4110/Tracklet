@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { DeleteItemCommand } from '@/lib/commands/DeleteItemCommand';
 
 export type ItemActionState = {
   error?: string;
@@ -33,30 +33,45 @@ async function createSupabaseServerClient() {
 
 export async function addItem(
   _prevState: ItemActionState,
-  formData: FormData,
+  formData: FormData
 ): Promise<ItemActionState> {
-  const name = formData.get('name') as string | null;
-  const store = formData.get('store') as string | null;
-  const purchaseDate = formData.get('purchase_date') as string | null;
-  const category = formData.get('category') as string | null;
-  const price = formData.get('price') as string | null;
+  const name = formData.get('name')?.toString().trim();
 
-  if (!name || name.trim() === '') {
+  if (!name) {
     return { error: 'Item name is required.' };
+  }
+
+  const store = formData.get('store')?.toString().trim() || null;
+  const purchase_date = formData.get('purchase_date')?.toString() || null;
+  const category = formData.get('category')?.toString().trim() || null;
+  const priceValue = formData.get('price')?.toString().trim();
+  const price = priceValue ? Number(priceValue) : null;
+
+  if (priceValue && Number.isNaN(price)) {
+    return { error: 'Price must be a valid number.' };
   }
 
   const supabase = await createSupabaseServerClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be signed in.' };
+  }
+
   const { error } = await supabase.from('items').insert({
-    name: name.trim(),
-    store: store?.trim() || null,
-    purchase_date: purchaseDate || null,
-    category: category?.trim() || null,
-    price: price ? parseFloat(price) : null,
+    user_id: user.id,
+    name,
+    store,
+    purchase_date,
+    category,
+    price,
   });
 
   if (error) {
-    return { error: error.message || 'Failed to add item.' };
+    return { error: error.message };
   }
 
   revalidatePath('/dashboard');
@@ -65,57 +80,61 @@ export async function addItem(
 
 export async function updateItem(
   _prevState: ItemActionState,
-  formData: FormData,
+  formData: FormData
 ): Promise<ItemActionState> {
-  const id = formData.get('id') as string | null;
-  const name = formData.get('name') as string | null;
-  const store = formData.get('store') as string | null;
-  const purchaseDate = formData.get('purchase_date') as string | null;
-  const category = formData.get('category') as string | null;
-  const price = formData.get('price') as string | null;
+  const id = formData.get('id')?.toString();
+  const name = formData.get('name')?.toString().trim();
 
   if (!id) {
     return { error: 'Item ID is required.' };
   }
 
-  if (!name || name.trim() === '') {
+  if (!name) {
     return { error: 'Item name is required.' };
+  }
+
+  const store = formData.get('store')?.toString().trim() || null;
+  const purchase_date = formData.get('purchase_date')?.toString() || null;
+  const category = formData.get('category')?.toString().trim() || null;
+  const priceValue = formData.get('price')?.toString().trim();
+  const price = priceValue ? Number(priceValue) : null;
+
+  if (priceValue && Number.isNaN(price)) {
+    return { error: 'Price must be a valid number.' };
   }
 
   const supabase = await createSupabaseServerClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be signed in.' };
+  }
+
   const { error } = await supabase
     .from('items')
     .update({
-      name: name.trim(),
-      store: store?.trim() || null,
-      purchase_date: purchaseDate || null,
-      category: category?.trim() || null,
-      price: price ? parseFloat(price) : null,
+      name,
+      store,
+      purchase_date,
+      category,
+      price,
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
 
   if (error) {
-    return { error: error.message || 'Failed to update item.' };
+    return { error: error.message };
   }
 
   revalidatePath('/dashboard');
   return { success: true };
 }
 
-export async function deleteItem(itemId: string): Promise<ItemActionState> {
-  if (!itemId) {
-    return { error: 'Item ID is required.' };
-  }
-
-  const supabase = await createSupabaseServerClient();
-
-  const { error } = await supabase.from('items').delete().eq('id', itemId);
-
-  if (error) {
-    return { error: error.message || 'Failed to delete item.' };
-  }
-
+export async function deleteItem(id: string) {
+  const command = new DeleteItemCommand(id);
+  await command.execute();
   revalidatePath('/dashboard');
-  return { success: true };
 }
