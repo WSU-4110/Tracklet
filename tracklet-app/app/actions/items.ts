@@ -102,3 +102,20 @@ export async function updateItem(
   revalidatePath('/dashboard');
   return { success: true };
 }
+
+export async function deleteItem(itemId: string): Promise<ItemActionState> {
+  if (!itemId) {
+    return { error: 'Item ID is required.' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { error } = await supabase.from('items').delete().eq('id', itemId);
+
+  if (error) {
+    return { error: error.message || 'Failed to delete item.' };
+  }
+
+  revalidatePath('/dashboard');
+  return { success: true };
+}
