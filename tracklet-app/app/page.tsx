@@ -1,21 +1,25 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
-import { signOut } from './actions/auth';
 
 export default async function Home() {
   const user = await getCurrentUser();
 
+  if (user) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-900">
-      {/*background elements */}
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
 
-      {/*Navbar*/}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-dark border-b border-white/20 backdrop-blur-xl">
+      {/* Navbar */}
+      <nav className="relative glass-dark border-b border-white/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -35,43 +39,25 @@ export default async function Home() {
             </div>
 
             <div className="flex items-center gap-3">
-              {user ? (
-                <>
-                  <span className="hidden sm:inline text-xs sm:text-sm text-gray-700 px-3 py-1.5 glass rounded-xl border border-white/20">
-                    {user.email}
-                  </span>
-                  <form action={signOut}>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold rounded-xl hover:from-red-600 hover:to-pink-600 shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-                    >
-                      Logout
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="px-4 py-2 text-xs sm:text-sm glass rounded-xl border border-white/20 text-gray-700 hover:bg-white/30 font-medium transition-all"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
-                  >
-                    Get started
-                  </Link>
-                </>
-              )}
+              <Link
+                href="/login"
+                className="px-4 py-2 text-xs sm:text-sm glass rounded-xl border border-white/20 text-gray-700 hover:bg-white/30 font-medium transition-all"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+              >
+                Get started
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-24 sm:space-y-32">
-        {/*Hero Section */}
+        {/* Hero Section */}
         <section className="grid gap-10 lg:grid-cols-2 items-center pt-8">
           <div>
             <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-white/30 text-xs font-medium text-gray-700 mb-4">
@@ -168,7 +154,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/*Benefits Section*/}
+        {/* Trust / Benefits Section */}
         <section id="features" className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -216,7 +202,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* How it works sec*/}
+        {/* How it Works Section */}
         <section id="how-it-works" className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -266,7 +252,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/*Product preview section */}
+        {/* Product Preview Section */}
         <section id="preview" className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -282,10 +268,10 @@ export default async function Home() {
               <div className="glass rounded-3xl border border-white/30 shadow-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-xs font-semibold text-gray-500 uppercase">
-                    Items overview
+                    Items overview (demo)
                   </p>
                   <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 text-xs font-medium border border-emerald-500/40">
-                    Example
+                    Sample dashboard
                   </span>
                 </div>
                 <div className="space-y-3 text-xs sm:text-sm">
@@ -363,7 +349,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/*FAQ Section*/}
+        {/* FAQ Section */}
         <section id="faq" className="space-y-6">
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -457,7 +443,7 @@ export default async function Home() {
         </section>
       </main>
 
-      {/*Footer*/}
+      {/* Footer */}
       <footer className="relative border-t border-white/20 glass-dark backdrop-blur-xl mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-gray-600">
           <p>© {new Date().getFullYear()} Tracklet. All rights reserved.</p>
