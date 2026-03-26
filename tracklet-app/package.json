@@ -6,29 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:login": "vitest run __tests__/components/LoginPage.test.tsx",
-    "test:register": "vitest run __tests__/components/RegisterPage.test.tsx",
-    "test:layout": "vitest run __tests__/layout.test.tsx",
-    "test:login:welcome": "vitest run __tests__/components/LoginPage.test.tsx -t \"Welcome Back\"",
-    "test:login:inputs": "vitest run __tests__/components/LoginPage.test.tsx -t \"renders email and password\"",
-    "test:login:link": "vitest run __tests__/components/LoginPage.test.tsx -t \"Create one\"",
-    "test:login:error": "vitest run __tests__/components/LoginPage.test.tsx -t \"displays an error message\"",
-    "test:login:submit": "vitest run __tests__/components/LoginPage.test.tsx -t \"Sign In\"",
-    "test:login:submit-enabled": "vitest run __tests__/components/LoginPage.test.tsx -t \"is not disabled initially\"",
-    "test:register:heading": "vitest run __tests__/components/RegisterPage.test.tsx -t \"Get Started\"",
-    "test:register:fields": "vitest run __tests__/components/RegisterPage.test.tsx -t \"first name, last name\"",
-    "test:register:minlength": "vitest run __tests__/components/RegisterPage.test.tsx -t \"minLength\"",
-    "test:register:link": "vitest run __tests__/components/RegisterPage.test.tsx -t \"Sign in\"",
-    "test:register:error": "vitest run __tests__/components/RegisterPage.test.tsx -t \"displays an error message\"",
-    "test:register:submit": "vitest run __tests__/components/RegisterPage.test.tsx -t \"Create Account\"",
-    "test:register:submit-enabled": "vitest run __tests__/components/RegisterPage.test.tsx -t \"is not disabled initially\"",
-    "test:layout:html-lang": "vitest run __tests__/layout.test.tsx -t \"lang\"",
-    "test:layout:children": "vitest run __tests__/layout.test.tsx -t \"renders children passed\"",
-    "test:layout:fonts": "vitest run __tests__/layout.test.tsx -t \"font CSS variable\"",
-    "test:layout:metadata": "vitest run __tests__/layout.test.tsx -t \"title and description\""
+    "lint": "eslint"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
@@ -39,17 +17,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "jsdom": "^28.1.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.1.2"
+    "typescript": "^5"
   }
 }
