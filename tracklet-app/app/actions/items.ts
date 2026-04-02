@@ -40,9 +40,28 @@ export async function addItem(
   const purchaseDate = formData.get('purchase_date') as string | null;
   const category = formData.get('category') as string | null;
   const price = formData.get('price') as string | null;
+  const returnPolicyDays = formData.get('return_policy_days') as string | null;
+  const warrantyDurationMonths = formData.get('warranty_duration_months') as string | null;
 
   if (!name || name.trim() === '') {
     return { error: 'Item name is required.' };
+  }
+
+  const parsedReturnDays = returnPolicyDays ? parseInt(returnPolicyDays, 10) : null;
+  const parsedWarrantyMonths = warrantyDurationMonths ? parseInt(warrantyDurationMonths, 10) : null;
+
+  let returnDeadline: string | null = null;
+  if (purchaseDate && parsedReturnDays) {
+    const d = new Date(purchaseDate);
+    d.setDate(d.getDate() + parsedReturnDays);
+    returnDeadline = d.toISOString().split('T')[0];
+  }
+
+  let warrantyExpiration: string | null = null;
+  if (purchaseDate && parsedWarrantyMonths) {
+    const d = new Date(purchaseDate);
+    d.setMonth(d.getMonth() + parsedWarrantyMonths);
+    warrantyExpiration = d.toISOString().split('T')[0];
   }
 
   const supabase = await createSupabaseServerClient();
@@ -53,6 +72,10 @@ export async function addItem(
     purchase_date: purchaseDate || null,
     category: category?.trim() || null,
     price: price ? parseFloat(price) : null,
+    return_policy_days: parsedReturnDays,
+    return_deadline: returnDeadline,
+    warranty_duration_months: parsedWarrantyMonths,
+    warranty_expiration: warrantyExpiration,
   });
 
   if (error) {
@@ -73,6 +96,8 @@ export async function updateItem(
   const purchaseDate = formData.get('purchase_date') as string | null;
   const category = formData.get('category') as string | null;
   const price = formData.get('price') as string | null;
+  const returnPolicyDays = formData.get('return_policy_days') as string | null;
+  const warrantyDurationMonths = formData.get('warranty_duration_months') as string | null;
 
   if (!id) {
     return { error: 'Item ID is required.' };
@@ -80,6 +105,23 @@ export async function updateItem(
 
   if (!name || name.trim() === '') {
     return { error: 'Item name is required.' };
+  }
+
+  const parsedReturnDays = returnPolicyDays ? parseInt(returnPolicyDays, 10) : null;
+  const parsedWarrantyMonths = warrantyDurationMonths ? parseInt(warrantyDurationMonths, 10) : null;
+
+  let returnDeadline: string | null = null;
+  if (purchaseDate && parsedReturnDays) {
+    const d = new Date(purchaseDate);
+    d.setDate(d.getDate() + parsedReturnDays);
+    returnDeadline = d.toISOString().split('T')[0];
+  }
+
+  let warrantyExpiration: string | null = null;
+  if (purchaseDate && parsedWarrantyMonths) {
+    const d = new Date(purchaseDate);
+    d.setMonth(d.getMonth() + parsedWarrantyMonths);
+    warrantyExpiration = d.toISOString().split('T')[0];
   }
 
   const supabase = await createSupabaseServerClient();
@@ -92,6 +134,10 @@ export async function updateItem(
       purchase_date: purchaseDate || null,
       category: category?.trim() || null,
       price: price ? parseFloat(price) : null,
+      return_policy_days: parsedReturnDays,
+      return_deadline: returnDeadline,
+      warranty_duration_months: parsedWarrantyMonths,
+      warranty_expiration: warrantyExpiration,
     })
     .eq('id', id);
 

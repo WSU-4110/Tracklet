@@ -8,6 +8,11 @@ export type Item = {
     purchase_date: string | null;
     category: string | null;
     price: string | null;
+    receipt_url: string | null;
+    return_policy_days: number | null;
+    return_deadline: string | null;
+    warranty_duration_months: number | null;
+    warranty_expiration: string | null;
     created_at: string;
 };
 
@@ -36,7 +41,7 @@ export async function getItemsForCurrentUser(): Promise<Item[]> {
 
     const { data, error } = await supabase
         .from('items')
-        .select('id, name, store, purchase_date, category, price, created_at')
+        .select('id, name, store, purchase_date, category, price, receipt_url, return_policy_days, return_deadline, warranty_duration_months, warranty_expiration, created_at')
         .order('created_at', { ascending: false });
 
     if (error) {

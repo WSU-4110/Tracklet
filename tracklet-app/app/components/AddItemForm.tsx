@@ -130,6 +130,36 @@ export default function AddItemForm() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="return_policy_days" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Return Window (days)
+                </label>
+                <input
+                  id="return_policy_days"
+                  type="number"
+                  name="return_policy_days"
+                  min="0"
+                  className="w-full text-gray-700 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/70 transition-all"
+                  placeholder="e.g., 30"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="warranty_duration_months" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Warranty (months)
+                </label>
+                <input
+                  id="warranty_duration_months"
+                  type="number"
+                  name="warranty_duration_months"
+                  min="0"
+                  className="w-full text-gray-700 px-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/70 transition-all"
+                  placeholder="e.g., 12"
+                />
+              </div>
+            </div>
+
             <SubmitButton />
           </form>
         </div>

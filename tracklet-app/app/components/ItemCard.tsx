@@ -91,6 +91,24 @@ export default function ItemCard({ item }: { item: Item }) {
               placeholder="Price"
             />
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              name="return_policy_days"
+              min="0"
+              defaultValue={item.return_policy_days ?? ''}
+              className="w-full text-gray-700 px-3 py-2 bg-white/50 backdrop-blur-sm border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+              placeholder="Return window (days)"
+            />
+            <input
+              type="number"
+              name="warranty_duration_months"
+              min="0"
+              defaultValue={item.warranty_duration_months ?? ''}
+              className="w-full text-gray-700 px-3 py-2 bg-white/50 backdrop-blur-sm border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+              placeholder="Warranty (months)"
+            />
+          </div>
           <div className="flex gap-2">
             <EditSubmitButton />
             <button
@@ -148,6 +166,18 @@ export default function ItemCard({ item }: { item: Item }) {
                 ${item.price}
               </p>
             )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {item.return_deadline && (
+                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-100/70 text-amber-700 border border-amber-200/50">
+                  Return by {item.return_deadline}
+                </span>
+              )}
+              {item.warranty_expiration && (
+                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-100/70 text-blue-700 border border-blue-200/50">
+                  Warranty until {item.warranty_expiration}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex gap-2 ml-4">
             <button
