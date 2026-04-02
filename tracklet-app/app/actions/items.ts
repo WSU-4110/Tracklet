@@ -83,6 +83,7 @@ export async function addItem(
   }
 
   revalidatePath('/dashboard');
+  revalidatePath('/items');
   return { success: true };
 }
 
@@ -146,6 +147,7 @@ export async function updateItem(
   }
 
   revalidatePath('/dashboard');
+  revalidatePath('/items');
   return { success: true };
 }
 
@@ -163,5 +165,6 @@ export async function deleteItem(itemId: string): Promise<ItemActionState> {
   }
 
   revalidatePath('/dashboard');
+  revalidatePath('/items');
   return { success: true };
 }
