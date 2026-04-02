@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
@@ -19,12 +20,23 @@ export default async function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="relative glass-dark border-b border-white/20 backdrop-blur-xl">
+      <nav className="relative glass border-b border-white/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Tracklet
-            </span>
+            <Link
+              href="/"
+              className="flex items-center shrink-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+            >
+              <Image
+                src="/logo.png"
+                alt="Tracklet"
+                width={160}
+                height={160}
+                className="h-9 sm:h-10 w-auto object-contain"
+                priority
+                unoptimized
+              />
+            </Link>
 
             <div className="hidden md:flex items-center gap-8 text-sm font-medium">
               <a href="#features" className="text-gray-700 hover:text-gray-900">
