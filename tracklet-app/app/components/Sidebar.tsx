@@ -56,7 +56,7 @@ const navItems = [
     ),
   },
   {
-    href: '#upload-receipt',
+    href: '/items#upload-receipt',
     label: 'Upload Receipt',
     iconBg: 'bg-purple-100',
     iconText: 'text-purple-700',
