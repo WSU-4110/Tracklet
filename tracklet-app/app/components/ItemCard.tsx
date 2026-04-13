@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { deleteItem, updateItem, type ItemActionState } from '../actions/items';
+import { deleteItem, removeItemReceipt, updateItem, type ItemActionState } from '../actions/items';
 import { useFormState, useFormStatus } from 'react-dom';
 import type { Item } from '@/lib/items';
 
@@ -24,6 +24,7 @@ export default function ItemCard({ item }: { item: Item }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteState, setDeleteState] = useState<ItemActionState>({});
+  const [receiptState, setReceiptState] = useState<ItemActionState>({});
   const [state, formAction] = useFormState(updateItem, initialState);
 
   const handleDelete = async () => {
@@ -32,6 +33,11 @@ export default function ItemCard({ item }: { item: Item }) {
     if (result.success) {
       setShowDeleteConfirm(false);
     }
+  };
+
+  const handleRemoveReceipt = async () => {
+    const result = await removeItemReceipt(item.id);
+    setReceiptState(result);
   };
 
   if (isEditing) {
@@ -109,6 +115,33 @@ export default function ItemCard({ item }: { item: Item }) {
               placeholder="Warranty (months)"
             />
           </div>
+          <div>
+            <label htmlFor={`receipt-${item.id}`} className="block text-xs font-semibold text-gray-600 mb-1">
+              New receipt (optional)
+            </label>
+            <input
+              id={`receipt-${item.id}`}
+              type="file"
+              name="receipt"
+              accept="image/jpeg,image/png,application/pdf"
+              capture="environment"
+              className="w-full text-xs text-gray-700 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-medium file:bg-blue-100 file:text-blue-800"
+            />
+          </div>
+          {receiptState.error && (
+            <div className="p-2 bg-red-500/15 border border-red-400/30 text-red-700 rounded-lg text-xs">
+              {receiptState.error}
+            </div>
+          )}
+          {item.receipt_url && (
+            <button
+              type="button"
+              onClick={handleRemoveReceipt}
+              className="text-xs font-semibold text-red-700 hover:text-red-900 underline-offset-2 hover:underline"
+            >
+              Remove current receipt
+            </button>
+          )}
           <div className="flex gap-2">
             <EditSubmitButton />
             <button
@@ -178,6 +211,16 @@ export default function ItemCard({ item }: { item: Item }) {
                 </span>
               )}
             </div>
+            {item.receipt_url && (
+              <a
+                href={item.receipt_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex mt-3 text-sm font-semibold text-violet-700 hover:text-violet-900"
+              >
+                View receipt
+              </a>
+            )}
           </div>
           <div className="flex gap-2 ml-4">
             <button

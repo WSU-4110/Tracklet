@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getItemsForCurrentUser } from '@/lib/items';
 import AddItemForm from '../../components/AddItemForm';
 import ItemCard from '../../components/ItemCard';
+import ReceiptUploadSection from '../../components/ReceiptUploadSection';
 
 export default async function ItemsPage() {
   const user = await getCurrentUser();
@@ -23,6 +24,10 @@ export default async function ItemsPage() {
         </div>
 
         <AddItemForm />
+
+        <div id="upload-receipt" className="scroll-mt-24">
+          <ReceiptUploadSection items={items} />
+        </div>
 
         {items.length === 0 ? (
           <div className="glass rounded-2xl border border-dashed border-white/40 p-6 text-sm text-gray-600">

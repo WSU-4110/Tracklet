@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { attachReceiptToItem, removeReceiptObject, validateReceiptFile } from '@/lib/receipts';
 
 export type ItemActionState = {
   error?: string;
@@ -42,9 +42,19 @@ export async function addItem(
   const price = formData.get('price') as string | null;
   const returnPolicyDays = formData.get('return_policy_days') as string | null;
   const warrantyDurationMonths = formData.get('warranty_duration_months') as string | null;
+  const receiptField = formData.get('receipt');
+  const receipt =
+    receiptField instanceof File && receiptField.size > 0 ? receiptField : null;
 
   if (!name || name.trim() === '') {
     return { error: 'Item name is required.' };
+  }
+
+  if (receipt) {
+    const receiptCheck = validateReceiptFile(receipt);
+    if (!receiptCheck.valid) {
+      return { error: receiptCheck.error ?? 'Invalid receipt file.' };
+    }
   }
 
   const parsedReturnDays = returnPolicyDays ? parseInt(returnPolicyDays, 10) : null;
@@ -65,21 +75,40 @@ export async function addItem(
   }
 
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be signed in.' };
+  }
 
-  const { error } = await supabase.from('items').insert({
-    name: name.trim(),
-    store: store?.trim() || null,
-    purchase_date: purchaseDate || null,
-    category: category?.trim() || null,
-    price: price ? parseFloat(price) : null,
-    return_policy_days: parsedReturnDays,
-    return_deadline: returnDeadline,
-    warranty_duration_months: parsedWarrantyMonths,
-    warranty_expiration: warrantyExpiration,
-  });
+  const { data: inserted, error } = await supabase
+    .from('items')
+    .insert({
+      user_id: user.id,
+      name: name.trim(),
+      store: store?.trim() || null,
+      purchase_date: purchaseDate || null,
+      category: category?.trim() || null,
+      price: price ? parseFloat(price) : null,
+      return_policy_days: parsedReturnDays,
+      return_deadline: returnDeadline,
+      warranty_duration_months: parsedWarrantyMonths,
+      warranty_expiration: warrantyExpiration,
+    })
+    .select('id')
+    .single();
 
-  if (error) {
-    return { error: error.message || 'Failed to add item.' };
+  if (error || !inserted) {
+    return { error: error?.message || 'Failed to add item.' };
+  }
+
+  if (receipt) {
+    const attach = await attachReceiptToItem(supabase, user.id, inserted.id, receipt, null);
+    if (attach.error) {
+      return { error: attach.error };
+    }
   }
 
   revalidatePath('/dashboard');
@@ -99,6 +128,9 @@ export async function updateItem(
   const price = formData.get('price') as string | null;
   const returnPolicyDays = formData.get('return_policy_days') as string | null;
   const warrantyDurationMonths = formData.get('warranty_duration_months') as string | null;
+  const receiptField = formData.get('receipt');
+  const receipt =
+    receiptField instanceof File && receiptField.size > 0 ? receiptField : null;
 
   if (!id) {
     return { error: 'Item ID is required.' };
@@ -106,6 +138,13 @@ export async function updateItem(
 
   if (!name || name.trim() === '') {
     return { error: 'Item name is required.' };
+  }
+
+  if (receipt) {
+    const receiptCheck = validateReceiptFile(receipt);
+    if (!receiptCheck.valid) {
+      return { error: receiptCheck.error ?? 'Invalid receipt file.' };
+    }
   }
 
   const parsedReturnDays = returnPolicyDays ? parseInt(returnPolicyDays, 10) : null;
@@ -126,6 +165,19 @@ export async function updateItem(
   }
 
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be signed in.' };
+  }
+
+  const { data: existing } = await supabase
+    .from('items')
+    .select('receipt_url')
+    .eq('id', id)
+    .single();
 
   const { error } = await supabase
     .from('items')
@@ -139,11 +191,123 @@ export async function updateItem(
       return_deadline: returnDeadline,
       warranty_duration_months: parsedWarrantyMonths,
       warranty_expiration: warrantyExpiration,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', id);
 
   if (error) {
     return { error: error.message || 'Failed to update item.' };
+  }
+
+  if (receipt) {
+    const attach = await attachReceiptToItem(
+      supabase,
+      user.id,
+      id,
+      receipt,
+      existing?.receipt_url ?? null,
+    );
+    if (attach.error) {
+      return { error: attach.error };
+    }
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/items');
+  return { success: true };
+}
+
+export async function uploadItemReceipt(
+  _prevState: ItemActionState,
+  formData: FormData,
+): Promise<ItemActionState> {
+  const itemId = formData.get('item_id') as string | null;
+  const receiptField = formData.get('receipt');
+  const receipt =
+    receiptField instanceof File && receiptField.size > 0 ? receiptField : null;
+
+  if (!itemId || itemId.trim() === '') {
+    return { error: 'Choose an item.' };
+  }
+  if (!receipt) {
+    return { error: 'Choose a receipt file.' };
+  }
+
+  const receiptCheck = validateReceiptFile(receipt);
+  if (!receiptCheck.valid) {
+    return { error: receiptCheck.error ?? 'Invalid receipt file.' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be signed in.' };
+  }
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('items')
+    .select('receipt_url')
+    .eq('id', itemId)
+    .single();
+
+  if (fetchError || !existing) {
+    return { error: fetchError?.message || 'Item not found.' };
+  }
+
+  const attach = await attachReceiptToItem(
+    supabase,
+    user.id,
+    itemId,
+    receipt,
+    existing.receipt_url,
+  );
+  if (attach.error) {
+    return { error: attach.error };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/items');
+  return { success: true };
+}
+
+export async function removeItemReceipt(itemId: string): Promise<ItemActionState> {
+  if (!itemId) {
+    return { error: 'Item ID is required.' };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be signed in.' };
+  }
+
+  const { data: row, error: fetchError } = await supabase
+    .from('items')
+    .select('receipt_url')
+    .eq('id', itemId)
+    .single();
+
+  if (fetchError) {
+    return { error: fetchError.message || 'Failed to load item.' };
+  }
+
+  if (row?.receipt_url) {
+    await removeReceiptObject(supabase, row.receipt_url);
+  }
+
+  const { error } = await supabase
+    .from('items')
+    .update({ receipt_url: null, updated_at: new Date().toISOString() })
+    .eq('id', itemId);
+
+  if (error) {
+    return { error: error.message || 'Failed to remove receipt.' };
   }
 
   revalidatePath('/dashboard');
@@ -157,6 +321,16 @@ export async function deleteItem(itemId: string): Promise<ItemActionState> {
   }
 
   const supabase = await createSupabaseServerClient();
+
+  const { data: row } = await supabase
+    .from('items')
+    .select('receipt_url')
+    .eq('id', itemId)
+    .single();
+
+  if (row?.receipt_url) {
+    await removeReceiptObject(supabase, row.receipt_url);
+  }
 
   const { error } = await supabase.from('items').delete().eq('id', itemId);
 
