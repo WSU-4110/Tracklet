@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { deleteItem, removeItemReceipt, updateItem, type ItemActionState } from '../actions/items';
 import { useFormState, useFormStatus } from 'react-dom';
 import type { Item } from '@/lib/items';
+import PolicyTimer from './PolicyTimer';
 
 const initialState: ItemActionState = {};
 
@@ -200,16 +201,32 @@ export default function ItemCard({ item }: { item: Item }) {
               </p>
             )}
             <div className="flex flex-wrap gap-2 mt-2">
-              {item.return_deadline && (
-                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-100/70 text-amber-700 border border-amber-200/50">
-                  Return by {item.return_deadline}
-                </span>
-              )}
-              {item.warranty_expiration && (
-                <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-100/70 text-blue-700 border border-blue-200/50">
-                  Warranty until {item.warranty_expiration}
-                </span>
-              )}
+              {item.return_deadline &&
+                (item.purchase_date ? (
+                  <PolicyTimer
+                    label="Return"
+                    purchaseDate={item.purchase_date}
+                    deadline={item.return_deadline}
+                    variant="amber"
+                  />
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-amber-100/70 text-amber-700 border border-amber-200/50">
+                    Return by {item.return_deadline}
+                  </span>
+                ))}
+              {item.warranty_expiration &&
+                (item.purchase_date ? (
+                  <PolicyTimer
+                    label="Warranty"
+                    purchaseDate={item.purchase_date}
+                    deadline={item.warranty_expiration}
+                    variant="blue"
+                  />
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-100/70 text-blue-700 border border-blue-200/50">
+                    Warranty until {item.warranty_expiration}
+                  </span>
+                ))}
             </div>
             {item.receipt_url && (
               <a
