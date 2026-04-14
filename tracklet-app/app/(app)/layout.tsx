@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
+import { buildDeadlineAlerts } from '@/lib/deadlineAlerts';
+import { getItemsForCurrentUser } from '@/lib/items';
+import DeadlineToastStack from '../components/DeadlineToastStack';
 import Sidebar from '../components/Sidebar';
 
 export default async function AppLayout({
@@ -23,6 +26,9 @@ export default async function AppLayout({
     [firstName, lastName].filter(Boolean).join(' ') || user.email || 'User';
   const displayName = firstName || user.email || 'User';
 
+  const items = await getItemsForCurrentUser();
+  const deadlineAlerts = buildDeadlineAlerts(items);
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-900">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -32,6 +38,8 @@ export default async function AppLayout({
       </div>
 
       <Sidebar displayName={displayName} fullName={fullName} />
+
+      <DeadlineToastStack initialAlerts={deadlineAlerts} />
 
       <main className="relative ml-16 px-6 sm:px-10 lg:px-14 py-10 space-y-10">
         {children}
