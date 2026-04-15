@@ -41,7 +41,7 @@ export default async function AppLayout({
 
       <DeadlineToastStack initialAlerts={deadlineAlerts} />
 
-      <main className="relative ml-16 px-6 sm:px-10 lg:px-14 py-10 space-y-10">
+      <main className="relative mt-16 md:mt-0 md:ml-16 px-4 sm:px-10 lg:px-14 py-6 sm:py-10 space-y-10">
         {children}
       </main>
     </div>

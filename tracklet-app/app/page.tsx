@@ -20,7 +20,7 @@ export default async function Home() {
       </div>
 
       {/* Navbar */}
-      <nav className="relative glass border-b border-white/20 backdrop-blur-xl">
+      <nav className="fixed inset-x-0 top-0 z-50 glass border-b border-white/30 bg-white/65 shadow-sm backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link
@@ -68,7 +68,7 @@ export default async function Home() {
         </div>
       </nav>
 
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-24 sm:space-y-32">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-12 sm:pb-16 space-y-24 sm:space-y-32">
         {/* Hero Section */}
         <section className="grid gap-10 lg:grid-cols-2 items-center pt-8">
           <div>
